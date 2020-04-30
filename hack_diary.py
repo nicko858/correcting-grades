@@ -1,3 +1,5 @@
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 import django
 django.setup()
 from datacenter.models import Mark
@@ -10,6 +12,8 @@ import random
 
 def get_schoolkid(schoolkid_name):
     schoolkid = Schoolkid.objects.get(full_name=schoolkid_name)
+    if len(schoolkid) > 1:
+        raise Schoolkid.MultipleObjectsReturned
     return schoolkid
 
 
@@ -52,6 +56,7 @@ if __name__ == "__main__":
     year_of_study, group_letter = 6, "А"
     poor_limit, good_point = 3, 5
     subject_for_commendations = "Математика"
+    lesson_step = 2
     commendation_phrases = [
         "Молодец!",
         "Отлично!",
@@ -84,7 +89,14 @@ if __name__ == "__main__":
         "Ты многое сделал, я это вижу!",
         "Теперь у тебя точно все получится!",
     ]
-    schoolkid = get_schoolkid(schoolkid_name)
+    try:
+        schoolkid = get_schoolkid(schoolkid_name)
+    except Schoolkid.DoesNotExist:
+        exit("Нет ученика с тамим именем - {0}".format(schoolkid_name))
+    except Schoolkid.MultipleObjectsReturned:
+        exit("Нaйдено больше 1 ученика с таким именем - {0}".format(
+            schoolkid_name
+            ))
     poor_grades = get_poor_grades(schoolkid, poor_limit)
     fix_marks(poor_grades, good_point)
     remove_chastisements(schoolkid)
@@ -93,6 +105,6 @@ if __name__ == "__main__":
         group_letter,
         subject_for_commendations,
         )
-    for lesson in lessons:
+    for lesson in lessons[::lesson_step]:
         commendation_phrase = random.choice(commendation_phrases)
         create_commendation(schoolkid, commendation_phrase, lesson)
