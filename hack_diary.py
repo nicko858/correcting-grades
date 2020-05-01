@@ -11,10 +11,7 @@ import random
 
 
 def get_schoolkid(schoolkid_name):
-    schoolkid = Schoolkid.objects.get(full_name=schoolkid_name)
-    if len(schoolkid) > 1:
-        raise Schoolkid.MultipleObjectsReturned
-    return schoolkid
+    return Schoolkid.objects.get(full_name=schoolkid_name)
 
 
 def fix_marks(grades, required_mark):
@@ -56,7 +53,6 @@ if __name__ == "__main__":
     year_of_study, group_letter = 6, "А"
     poor_limit, good_point = 3, 5
     subject_for_commendations = "Математика"
-    lesson_step = 2
     commendation_phrases = [
         "Молодец!",
         "Отлично!",
@@ -105,6 +101,7 @@ if __name__ == "__main__":
         group_letter,
         subject_for_commendations,
         )
+    lesson_step = 2
     for lesson in lessons[::lesson_step]:
         commendation_phrase = random.choice(commendation_phrases)
         create_commendation(schoolkid, commendation_phrase, lesson)
